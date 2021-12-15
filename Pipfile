@@ -8,6 +8,8 @@ django = "*"
 opencv-python = "*"
 mediapipe = "*"
 numpy = "*"
+gunicorn = "*"
+django-heroku = "*"
 
 [dev-packages]
 
