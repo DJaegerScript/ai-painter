@@ -10,6 +10,7 @@ mediapipe = "*"
 numpy = "*"
 gunicorn = "*"
 django-heroku = "*"
+urllib3 = "*"
 
 [dev-packages]
 
