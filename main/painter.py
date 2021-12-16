@@ -4,7 +4,7 @@ import cv2
 import threading
 import numpy as np
 
-class FaceDetector(object):
+class Painter(object):
     def __init__(self, hand_tracker):
         self.file_storage = StaticFilesStorage()
         
@@ -90,6 +90,13 @@ class FaceDetector(object):
             if all (x >= 1 for x in fingers[:-1]):
                 self.img_canvas = np.zeros((720, 1280, 3), np.uint8)
         
+        
+        imgGray = cv2.cvtColor(self.img_canvas, cv2.COLOR_RGB2GRAY)
+        _, imgInv = cv2.threshold(imgGray, 50, 255, cv2.THRESH_BINARY_INV)
+        imgInv = cv2.cvtColor(imgInv,cv2.COLOR_GRAY2RGB)
+        image = cv2.bitwise_and(image,imgInv)
+        image = cv2.bitwise_or(image,self.img_canvas)
+            
         image[0:125, 0:1280] = self.header
         image = cv2.addWeighted(image,1,self.img_canvas,0.6,0)
         _, jpeg = cv2.imencode('.jpg', image)
