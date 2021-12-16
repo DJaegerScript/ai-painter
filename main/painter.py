@@ -3,9 +3,11 @@ from django.contrib.staticfiles.utils import get_files
 import cv2
 import threading
 import numpy as np
+import urllib.request as req
 
 class Painter(object):
     def __init__(self, hand_tracker):
+        self.req = req
         self.file_storage = StaticFilesStorage()
         
         self.video = cv2.VideoCapture(0)
@@ -40,8 +42,6 @@ class Painter(object):
         # 4. If Selection Mode - Two finger are up (pilih mau warna apa / eraser)
         if fingers[1] and fingers[2]:
             self.xp, self.yp = 0, 0
-            # print("Selection Mode")
-            # Checking for the click
             if y1 < 125:
                 if 250 < x1 < 450:
                     self.header = self.__get_header(0)
@@ -60,7 +60,6 @@ class Painter(object):
         # 5. If Drawing Mode - Index finger is up (ini untuk ngegambar)
         if fingers[1] and fingers[2] == False:
             cv2.circle(image, (x1, y1), 15, self.draw_color, cv2.FILLED)
-            # print("Drawing Mode")
             if self.xp == 0 and self.yp == 0:
                 self.xp, self.yp = x1, y1
 
@@ -80,7 +79,7 @@ class Painter(object):
         if all (x >= 1 for x in fingers[:-1]):
             self.img_canvas = np.zeros((720, 1280, 3), np.uint8)
         
-    def __get_frame(self):
+    def __get_frame(self):  
         image = self.frame
         image = cv2.flip(image, 1)
         image = self.hand_tracker.findHands(image)
@@ -101,13 +100,20 @@ class Painter(object):
         return jpeg.tobytes()
     
     def __get_header(self, index):
-        static_file_location = "main/static/images"
-        static_file_list = list(get_files(self.file_storage, location=static_file_location))
+        image_urls = ['https://ai-painter.s3.ap-southeast-1.amazonaws.com/531305.jpg', 
+                      'https://ai-painter.s3.ap-southeast-1.amazonaws.com/531306.jpg',
+                      'https://ai-painter.s3.ap-southeast-1.amazonaws.com/531307.jpg',
+                      'https://ai-painter.s3.ap-southeast-1.amazonaws.com/531308.jpg'] 
+        
         overlay_list = []
-        for static_img_path in static_file_list:
-            img_name = static_img_path.split('\\')[1]
-            image = cv2.imread(f'{static_file_location}/{img_name}')
-            overlay_list.append(image)
+
+        
+        for image_url in image_urls:
+            results = self.req.urlopen(image_url)
+            img = np.asarray(bytearray(results.read()), dtype="uint8")
+            img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+            overlay_list.append(img)
+
         return overlay_list[index]        
     
     def update(self):
