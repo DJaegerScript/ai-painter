@@ -32,6 +32,7 @@ class Painter(object):
     def __get_frame(self):  
         image = self.frame
         image = cv2.flip(image, 1)
+        print(image)
         image = self.hand_tracker.findHands(image)
         lm_list = self.hand_tracker.findPosition(image)
         
@@ -81,9 +82,7 @@ class Painter(object):
         # Clear Canvas when all fingers are up
         if all (x >= 1 for x in fingers[:-1]):
             self.img_canvas = np.zeros((720, 1280, 3), np.uint8)     
-            
-        print(self.img_canvas ) 
-        
+                    
         imgGray = cv2.cvtColor(self.img_canvas, cv2.COLOR_RGB2GRAY)
         _, imgInv = cv2.threshold(imgGray, 50, 255, cv2.THRESH_BINARY_INV)
         imgInv = cv2.cvtColor(imgInv,cv2.COLOR_GRAY2RGB)
