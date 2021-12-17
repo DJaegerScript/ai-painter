@@ -7,7 +7,7 @@ class Painter(object):
     def __init__(self, hand_tracker):
         self.req = req
         
-        self.video = cv2.VideoCapture(-1)
+        self.video = cv2.VideoCapture(0, cv2.CAP_V4L)
         self.video.set(3, 1280)
         self.video.set(4, 720)
         
