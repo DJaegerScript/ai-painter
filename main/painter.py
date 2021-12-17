@@ -32,7 +32,7 @@ class Painter(object):
     def __get_frame(self):  
         image = self.frame
         image = cv2.flip(image, 1)
-        print(image)
+        print(self.frame, self.grabbed)
         image = self.hand_tracker.findHands(image)
         lm_list = self.hand_tracker.findPosition(image)
         

@@ -17,9 +17,7 @@ class HandTracker():
         
 
     # nemuin tangan dan gambar line di tangan
-    def findHands(self, img, draw=True):
-        print(img) 
-        
+    def findHands(self, img, draw=True):        
         imgRGB = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) # ubah ke RGB
         self.results = self.hands.process(imgRGB) # result dari posisi tangan dll
 
