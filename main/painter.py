@@ -1,5 +1,3 @@
-from django.contrib.staticfiles.storage import StaticFilesStorage
-from django.contrib.staticfiles.utils import get_files
 import cv2
 import threading
 import numpy as np
@@ -8,7 +6,6 @@ import urllib.request as req
 class Painter(object):
     def __init__(self, hand_tracker):
         self.req = req
-        self.file_storage = StaticFilesStorage()
         
         self.video = cv2.VideoCapture(0)
         self.video.set(3, 1280)
