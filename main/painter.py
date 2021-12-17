@@ -27,10 +27,16 @@ class Painter(object):
         threading.Thread(target=self.update).start()
     
     def __del__(self):
-        self.video.release()
+        self.video.release()        
         
-    def __track_fingers(self, lm_list, image):
-        x1, y1 = lm_list[8][1:]
+    def __get_frame(self):  
+        image = self.frame
+        image = cv2.flip(image, 1)
+        image = self.hand_tracker.findHands(image)
+        lm_list = self.hand_tracker.findPosition(image)
+        
+        if len(lm_list) != 0:
+            x1, y1 = lm_list[8][1:]
         x2, y2 = lm_list[12][1:]
 
         # 3. Check which fingers are up
@@ -74,16 +80,9 @@ class Painter(object):
 
         # Clear Canvas when all fingers are up
         if all (x >= 1 for x in fingers[:-1]):
-            self.img_canvas = np.zeros((720, 1280, 3), np.uint8)
-        
-    def __get_frame(self):  
-        image = self.frame
-        image = cv2.flip(image, 1)
-        image = self.hand_tracker.findHands(image)
-        lm_list = self.hand_tracker.findPosition(image)
-        
-        if len(lm_list) != 0:
-            self.__track_fingers(lm_list, image)       
+            self.img_canvas = np.zeros((720, 1280, 3), np.uint8)     
+            
+        print(self.img_canvas ) 
         
         imgGray = cv2.cvtColor(self.img_canvas, cv2.COLOR_RGB2GRAY)
         _, imgInv = cv2.threshold(imgGray, 50, 255, cv2.THRESH_BINARY_INV)
