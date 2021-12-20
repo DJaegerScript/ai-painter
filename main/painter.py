@@ -7,7 +7,7 @@ class Painter(object):
     def __init__(self, hand_tracker):
         self.req = req
         
-        self.video = cv2.VideoCapture(0, cv2.CAP_V4L)
+        self.video = cv2.VideoCapture(0)
         self.video.set(3, 1280)
         self.video.set(4, 720)
         
@@ -38,50 +38,50 @@ class Painter(object):
         
         if len(lm_list) != 0:
             x1, y1 = lm_list[8][1:]
-        x2, y2 = lm_list[12][1:]
+            x2, y2 = lm_list[12][1:]
 
-        # 3. Check which fingers are up
-        fingers = self.hand_tracker.fingersUp()
+            # 3. Check which fingers are up
+            fingers = self.hand_tracker.fingersUp()
 
-        # 4. If Selection Mode - Two finger are up (pilih mau warna apa / eraser)
-        if fingers[1] and fingers[2]:
-            self.xp, self.yp = 0, 0
-            if y1 < 125:
-                if 250 < x1 < 450:
-                    self.header = self.__get_header(0)
-                    self.draw_color = (255, 0, 255)
-                elif 550 < x1 < 750:
-                    self.header = self.__get_header(1)
-                    self.draw_color = (255, 0, 0)
-                elif 800 < x1 < 950:
-                    self.header = self.__get_header(2)
-                    self.draw_color = (0, 255, 0)
-                elif 1050 < x1 < 1200:
-                    self.header = self.__get_header(3)
-                    self.draw_color = (0, 0, 0)
-            cv2.rectangle(image, (x1, y1 - 25), (x2, y2 + 25), self.draw_color, cv2.FILLED)
+            # 4. If Selection Mode - Two finger are up (pilih mau warna apa / eraser)
+            if fingers[1] and fingers[2]:
+                self.xp, self.yp = 0, 0
+                if y1 < 125:
+                    if 250 < x1 < 450:
+                        self.header = self.__get_header(0)
+                        self.draw_color = (255, 0, 255)
+                    elif 550 < x1 < 750:
+                        self.header = self.__get_header(1)
+                        self.draw_color = (255, 0, 0)
+                    elif 800 < x1 < 950:
+                        self.header = self.__get_header(2)
+                        self.draw_color = (0, 255, 0)
+                    elif 1050 < x1 < 1200:
+                        self.header = self.__get_header(3)
+                        self.draw_color = (0, 0, 0)
+                cv2.rectangle(image, (x1, y1 - 25), (x2, y2 + 25), self.draw_color, cv2.FILLED)
 
-        # 5. If Drawing Mode - Index finger is up (ini untuk ngegambar)
-        if fingers[1] and fingers[2] == False:
-            cv2.circle(image, (x1, y1), 15, self.draw_color, cv2.FILLED)
-            if self.xp == 0 and self.yp == 0:
+            # 5. If Drawing Mode - Index finger is up (ini untuk ngegambar)
+            if fingers[1] and fingers[2] == False:
+                cv2.circle(image, (x1, y1), 15, self.draw_color, cv2.FILLED)
+                if self.xp == 0 and self.yp == 0:
+                    self.xp, self.yp = x1, y1
+
+                cv2.line(image, (self.xp, self.yp), (x1, y1), self.draw_color, self.brushThickness)
+
+                if self.draw_color == (0, 0, 0):
+                    cv2.line(image, (self.xp, self.yp), (x1, y1), self.draw_color, self.eraserThickness)
+                    cv2.line(self.img_canvas, (self.xp, self.yp), (x1, y1), self.draw_color, self.eraserThickness)
+                
+                else:
+                    cv2.line(image, (self.xp, self.yp), (x1, y1), self.draw_color, self.brushThickness)
+                    cv2.line(self.img_canvas, (self.xp, self.yp), (x1, y1), self.draw_color, self.brushThickness)
+
                 self.xp, self.yp = x1, y1
 
-            cv2.line(image, (self.xp, self.yp), (x1, y1), self.draw_color, self.brushThickness)
-
-            if self.draw_color == (0, 0, 0):
-                cv2.line(image, (self.xp, self.yp), (x1, y1), self.draw_color, self.eraserThickness)
-                cv2.line(self.img_canvas, (self.xp, self.yp), (x1, y1), self.draw_color, self.eraserThickness)
-            
-            else:
-                cv2.line(image, (self.xp, self.yp), (x1, y1), self.draw_color, self.brushThickness)
-                cv2.line(self.img_canvas, (self.xp, self.yp), (x1, y1), self.draw_color, self.brushThickness)
-
-            self.xp, self.yp = x1, y1
-
-        # Clear Canvas when all fingers are up
-        if all (x >= 1 for x in fingers[:-1]):
-            self.img_canvas = np.zeros((720, 1280, 3), np.uint8)     
+            # Clear Canvas when all fingers are up
+            if all (x >= 1 for x in fingers[:-1]):
+                self.img_canvas = np.zeros((720, 1280, 3), np.uint8)     
                     
         imgGray = cv2.cvtColor(self.img_canvas, cv2.COLOR_RGB2GRAY)
         _, imgInv = cv2.threshold(imgGray, 50, 255, cv2.THRESH_BINARY_INV)
